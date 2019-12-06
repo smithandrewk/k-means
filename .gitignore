@@ -33,3 +33,5 @@
 
 #Input files
 *.txt
+*.tar
+*.gz

@@ -48,10 +48,11 @@ class DataAnalytics
 
 private:
     int rows, columns;
+    double **data;
 
 public:
     //TODO proper member init
-    double **data;
+
     DataAnalytics();
     DataAnalytics(int rows, int columns, double value);
     DataAnalytics(double **);
@@ -71,13 +72,14 @@ public:
     int getcol() const;
     void setrow(int rows);
     int getrow() const;
+    double **getData() const;
 
     void zeroMoment() const;
     void firstMoment() const;
     void secondMoment() const;
     void thirdMoment() const;
     void fourthMoment() const;
-    double* nthMoment(int n) const;
+    double *nthMoment(int n) const;
     void kMeansClustering(int numberOfClusters) const;
     void classify() const;
     //not incl in project
