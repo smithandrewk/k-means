@@ -13,20 +13,20 @@ int main(int argc, char **argv)
     ofstream out_file;
     DataAnalytics train, test;
 
-    // cout << "Please enter the name of the train file, rows, and columns: ";
-    // cin >> fname;
-    // cin >> row;
-    // cin >> col;
-    train.setrow(20);
-    train.setcol(2);
+    cout << "Please enter the name of the train file, rows, and columns: ";
+    cin >> fname;
+    cin >> row;
+    cin >> col;
+    train.setrow(row);
+    train.setcol(col);
 
-    in_file.open("input/final20.txt");
+    in_file.open(fname);
     if (in_file.fail())
     {
         cout << "Error openning the file " << argv[1] << " \n";
         exit(1);
     }
-    // in_file >> train;
+    in_file >> train;
     in_file.close();
 
     // cout << "Zeroeth statistical moment: " << endl;

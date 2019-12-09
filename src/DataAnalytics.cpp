@@ -6,7 +6,7 @@ using namespace std;
 //Default Constructor
 DataAnalytics::DataAnalytics()
 {
-    data = new double*;
+    data = NULL;
     this->setrow(0);
     this->setcol(0);
 }
@@ -72,14 +72,17 @@ void DataAnalytics::setcol(int columns)
     //Doesn't check to see if data has already been initialized..
     //setcol should be private
     //but valafar called setcol in sample main
-    // if (columns == 0)
-    // {
-    //     this->data = NULL;
-    // }
-    // else
-    // {
-    //     this->data = new double *[columns];
-    // }
+    if(this->getData()==NULL){
+        return;
+    }
+    if (columns == 0)
+    {
+        this->data = NULL;
+    }
+    else
+    {
+        this->data = new double *[columns];
+    }
     this->columns = columns;
 }
 int DataAnalytics::getcol() const

@@ -1,3 +1,4 @@
+#makefile for k-means in c++
 default:
 	g++ -g src/main.cpp src/DataAnalytics.cpp
 # default: main.o DataAnalytics.o
@@ -8,11 +9,9 @@ default:
 # 	g++ -c -g src/DataAnalytics.cpp -o ../bin
 # main.o:
 # 	g++ -c -g src/main.cpp -o main.o
-1d:
-	./a.out ./input/1d.csv out
-2d:
-	./a.out ./input/2d.csv out
+run:
+	./a.out
 v:
-	valgrind ./a.out ./input/1d.csv out
+	valgrind ./a.out
 c:
 	rm -rf a.out *.o
