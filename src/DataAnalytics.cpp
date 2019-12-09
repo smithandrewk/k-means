@@ -13,20 +13,46 @@ DataAnalytics::DataAnalytics()
     this->setcol(0);
 }
 //Alternate Constructor
-DataAnalytics::DataAnalytics(int rows, int columns, double value)
+DataAnalytics::DataAnalytics(int rows, int columns, double value=0)
 {
     data = new double *[columns];
-    this->setrow(rows);
+        this->setrow(rows);
     this->setcol(columns);
+    //TODO init with value
+
 }
 DataAnalytics::DataAnalytics(double **)
 {
 }
 DataAnalytics::DataAnalytics(const DataAnalytics &rhs)
 {
-    this->data = rhs.getData();
-    this->columns = rhs.getcol();
-    this->rows = rhs.getrow();
+    rows = rhs.getrow();
+    columns = rhs.getcol();
+    numberOfClusters = rhs.numberOfClusters;
+    data = new double *[columns];
+    centroids = new double *[numberOfClusters];
+    membership = new int[rows];
+    for (int i = 0; i < columns; i++)
+    {
+        (data[i]) = new double[rows];
+        for (int j = 0; j < rows; j++)
+        {
+            //only execute once through outer for loop
+            if (i == (columns - 1))
+            {
+                membership[j] = rhs.membership[j];
+            }
+            (data[i])[j] = (rhs.data[i])[j];
+        }
+    }
+    for (int i = 0; i < numberOfClusters; i++)
+    {
+        (centroids[i]) = new double[columns];
+        for (int j = 0; j < columns; j++)
+        {
+            (centroids[i])[j] = (rhs.centroids[i])[j];
+        }
+    }
 }
 DataAnalytics::~DataAnalytics()
 {
@@ -71,17 +97,32 @@ DataAnalytics::~DataAnalytics()
     delete[] this->membership;
 }
 //Ass
-const DataAnalytics &DataAnalytics::operator=(const DataAnalytics &)
+const DataAnalytics &DataAnalytics::operator=(const DataAnalytics &rhs)
 {
+    this->numberOfClusters = rhs.numberOfClusters;
+    //? if we alreaddy initialized this, then why?
+    centroids = new double *[numberOfClusters];
+
+    for (int i = 0; i < numberOfClusters; i++)
+    {
+        //SHOULD be same number of columns
+        (centroids[i]) = new double[columns];
+        for (int j = 0; j < columns; j++)
+        {
+            (centroids[i])[j] = (rhs.centroids[i])[j];
+        }
+    }
+
+    return *this;
 }
 //Equality operator
 //?
-bool DataAnalytics::operator==(const DataAnalytics &) const
+bool DataAnalytics::operator==(const DataAnalytics &rhs) const
 {
 }
 //Inequality operator
 //?unsure of rhs
-bool DataAnalytics::operator!=(const DataAnalytics &) const
+bool DataAnalytics::operator!=(const DataAnalytics &rhs) const
 {
 }
 //TODO check for valid values
@@ -106,6 +147,12 @@ void DataAnalytics::setcol(int columns)
         {
             (this->data[i]) = new double[this->getrow()];
         }
+        //Initialize membership
+        this->membership = new int[this->getrow()];
+        for (int i = 0; i < this->getrow(); i++)
+        {
+            membership[i] = 0;
+        }
     }
     this->columns = columns;
 }
@@ -113,15 +160,32 @@ int DataAnalytics::getcol() const
 {
     return this->columns;
 }
-//TODO check for valid values
+/**
+ * To set member variable rows for this
+ * @param rows number of rows in data to set
+ * @return void
+ */
+
 void DataAnalytics::setrow(int rows)
 {
-    this->rows = rows;
+    if (rows >= 0)
+    {
+        this->rows = rows;
+    }
 }
+/**
+ * To get member variable rows for this
+ * @return number of rows in data
+ */
 int DataAnalytics::getrow() const
 {
     return this->rows;
 }
+/**
+ *
+ * To get member variable data for this
+ * @return double pointer for data points which are doubles
+ */
 double **DataAnalytics::getData() const
 {
     return this->data;
@@ -238,13 +302,23 @@ double *DataAnalytics::nthMoment(int n) const
     }
     return nthMoment;
 }
+/**
+ * To set the member variable numberOfClusters
+ * @param n numberOfClusters input by user in main.cpp for kmeans classification
+ * @return void
+ */
 void DataAnalytics::setNumberOfClusters(int n)
 {
-    if(n > 0){
-        this->numberOfClusters=n;
+    if (n > 0)
+    {
+        this->numberOfClusters = n;
     }
 }
-
+/**
+ * naive implementation of k-means
+ * @param numberOfClusters number of clustersto classify the data points into
+ * @return void
+ */
 void DataAnalytics::kMeansClustering(int numberOfClusters)
 {
     //set number of clusters as member variable
@@ -258,30 +332,16 @@ void DataAnalytics::kMeansClustering(int numberOfClusters)
         centroids[i] = new double[this->getcol()];
         //This loop traverses each row
         for (int j = 0; j < this->getcol(); j++)
-        {   
+        {
             //i is cluster number, j is column
             (centroids[i])[j] = (this->getData()[j])[i];
         }
     }
-    //Initialize membership
-    this->membership = new int[this->getrow()];
 
-    for (int i = 0; i < this->getrow(); i++)
-    {
-        membership[i] = 0;
-    }
+    //TODO convergence condition
     classify();
-    printCentroids();
     classify();
-    printCentroids();
     classify();
-    printCentroids();
-    classify();
-    printCentroids();
-    classify();
-    printCentroids();
-    classify();
-    printCentroids();
 }
 
 void DataAnalytics::classify() const
@@ -352,6 +412,7 @@ void DataAnalytics::classify() const
         }
     }
     delete[] numberOfPointsInCluster;
+    printCentroids();
 }
 //not incl in project
 /**
@@ -369,6 +430,10 @@ void DataAnalytics::printArray(double *arrayToPrint, int size)
     }
     cout << endl;
 }
+/**
+ * To print the membership array of this
+ * @return void
+ */
 void DataAnalytics::printMembership() const
 {
     // Print membership

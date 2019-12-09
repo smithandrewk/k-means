@@ -41,15 +41,19 @@ class DataAnalytics
         {
             for (int j = 0; j < rhs.getcol(); j++)
             {
-                if (j == (rhs.getcol() - 1))
-                {
-                    lhs << (rhs.data[j])[i] << endl;
-                }
-                else
-                {
-                    lhs << (rhs.data[j])[i] << ", ";
-                }
+                //Pretty printing to check if last column
+                // if (j == (rhs.getcol() - 1))
+                // {
+                //     lhs << (rhs.data[j])[i] << endl;
+                // }
+                // else
+                // {
+                //     lhs << (rhs.data[j])[i] << ", ";
+                // }
+                //Updated valafar instructions
+                lhs << (rhs.data[j])[i] << " ";
             }
+            lhs << rhs.membership[i] << endl;
         }
         return lhs;
     }
@@ -85,6 +89,7 @@ public:
 
     void zeroMoment() const;
     void firstMoment() const;
+    //TODO reconcile with website given by valafar
     void secondMoment() const;
     void thirdMoment() const;
     void fourthMoment() const;

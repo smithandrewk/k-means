@@ -46,10 +46,10 @@ int main(int argc, char **argv)
     // cin >> fname;
     // cin >> row;
     // cin >> col;
-    test.setrow(20000);
+    test.setrow(2000000);
     test.setcol(2);
 
-    in_file.open("final20000.txt");
+    in_file.open("final2000000.txt");
     if (in_file.fail())
     {
         cout << "Error openning the file " << argv[1] << " \n";
@@ -57,9 +57,9 @@ int main(int argc, char **argv)
     }
     in_file >> test;
     in_file.close();
-
-    // test = train;
-    // test.classify();
+    DataAnalytics copy(train);
+    test = train;
+    test.classify();
 
     // cout << "Please enter the output file: ";
     // cin >> fname;
