@@ -1,4 +1,5 @@
 #include <iostream>
+#include <omp.h>
 using namespace std;
 
 class DataAnalytics
@@ -10,14 +11,21 @@ class DataAnalytics
         //TODO check for first line of data
         //TODO handle headers
         double temp(0);
-        for (int i = 0; i < rhs.getcol(); i++)
-        {
-            rhs.data[i] = new double[rhs.getrow()];
-        }
         int i(0);
+
+// #pragma omp parallel
+//         {
+//             for (int i = 0; i < rhs.getrow(); i++)
+//             {
+//                 for (int j = 0; j < rhs.getcol(); j++)
+//                 {
+//                     lhs >> (rhs.data[j])[i];
+//                 }
+//             }
+//         }
+
         while (!lhs.eof())
         {
-
             for (int j = 0; j < rhs.getcol(); j++)
             {
                 lhs >> (rhs.data[j])[i];
@@ -48,7 +56,9 @@ class DataAnalytics
 
 private:
     int rows, columns;
-    double **data;
+    double **data, **centroids;
+    int *membership;
+    int numberOfClusters;
 
 public:
     //TODO proper member init
@@ -66,10 +76,9 @@ public:
     //Inequality operator
     //?unsure of rhs
     bool operator!=(const DataAnalytics &) const;
-    //Concatenates two arrays
-    const double **operator+(double **rhs) const;
     void setcol(int columns);
     int getcol() const;
+    void setNumberOfClusters(int);
     void setrow(int rows);
     int getrow() const;
     double **getData() const;
@@ -80,8 +89,10 @@ public:
     void thirdMoment() const;
     void fourthMoment() const;
     double *nthMoment(int n) const;
-    void kMeansClustering(int numberOfClusters) const;
+    void kMeansClustering(int numberOfClusters);
     void classify() const;
     //not incl in project
     void printArray(double *arrayToPrint, int size);
+    void printCentroids() const;
+    void printMembership() const;
 };

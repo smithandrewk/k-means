@@ -7,6 +7,8 @@ using namespace std;
 DataAnalytics::DataAnalytics()
 {
     data = NULL;
+    centroids = NULL;
+    membership = NULL;
     this->setrow(0);
     this->setcol(0);
 }
@@ -28,25 +30,45 @@ DataAnalytics::DataAnalytics(const DataAnalytics &rhs)
 }
 DataAnalytics::~DataAnalytics()
 {
-    // if (this->data == NULL)
-    // {
-    //     return;
-    // }
-    // else
-    // {
-    //     for (int i = 0; i < this->getcol(); i++)
-    //     {
-    //         if (this->data[i] == NULL)
-    //         {
-    //             continue;
-    //         }
-    //         else
-    //         {
-    //             delete[] this->data[i];
-    //         }
-    //     }
-    //     delete[] this->data;
-    // }
+    if (this->data == NULL)
+    {
+        return;
+    }
+    else
+    {
+        for (int i = 0; i < this->getcol(); i++)
+        {
+            if (this->data[i] == NULL)
+            {
+                continue;
+            }
+            else
+            {
+                delete[] this->data[i];
+            }
+        }
+        delete[] this->data;
+    }
+    if (this->centroids == NULL)
+    {
+        return;
+    }
+    else
+    {
+        for (int i = 0; i < this->numberOfClusters; i++)
+        {
+            if (this->centroids[i] == NULL)
+            {
+                continue;
+            }
+            else
+            {
+                delete[] this->centroids[i];
+            }
+        }
+        delete[] this->centroids;
+    }
+    delete[] this->membership;
 }
 //Ass
 const DataAnalytics &DataAnalytics::operator=(const DataAnalytics &)
@@ -62,19 +84,17 @@ bool DataAnalytics::operator==(const DataAnalytics &) const
 bool DataAnalytics::operator!=(const DataAnalytics &) const
 {
 }
-//Concatenates two arrays
-const double **DataAnalytics::operator+(double **rhs) const
-{
-}
 //TODO check for valid values
 void DataAnalytics::setcol(int columns)
 {
     //Doesn't check to see if data has already been initialized..
     //setcol should be private
     //but valafar called setcol in sample main
-    if(this->getData()==NULL){
-        return;
+    if (!(this->getData() == NULL))
+    {
+        this->~DataAnalytics();
     }
+
     if (columns == 0)
     {
         this->data = NULL;
@@ -82,6 +102,10 @@ void DataAnalytics::setcol(int columns)
     else
     {
         this->data = new double *[columns];
+        for (int i = 0; i < columns; i++)
+        {
+            (this->data[i]) = new double[this->getrow()];
+        }
     }
     this->columns = columns;
 }
@@ -105,7 +129,6 @@ double **DataAnalytics::getData() const
 void DataAnalytics::zeroMoment() const
 {
     double **zeroMoment = new double *[this->getcol()];
-
     //Init each zeroMoment to be printed
     for (int i = 0; i < this->getcol(); i++)
     {
@@ -113,6 +136,10 @@ void DataAnalytics::zeroMoment() const
         //Index 1 - minimum value of column
         //Index 2 - maximum value of column
         zeroMoment[i] = new double[3];
+        for (int j = 0; j < 3; j++)
+        {
+            (zeroMoment[i])[j] = 0;
+        }
     }
 
     //Finishes row, then proceeds to next
@@ -139,13 +166,13 @@ void DataAnalytics::zeroMoment() const
     {
         cout << i << ": #pts: " << (zeroMoment[i])[0] << " min: " << (zeroMoment[i])[1] << " max: " << (zeroMoment[i])[2] << endl;
     }
-    //dealloc
-    // for (int i = 0; i < this->getcol(); i++)
-    // {
+    // dealloc
+    for (int i = 0; i < this->getcol(); i++)
+    {
 
-    //     delete zeroMoment[i];
-    // }
-    // delete[]zeroMoment;
+        delete[] zeroMoment[i];
+    }
+    delete[] zeroMoment;
 }
 void DataAnalytics::firstMoment() const
 {
@@ -156,6 +183,7 @@ void DataAnalytics::firstMoment() const
         firstMoment[i] /= this->getrow();
         cout << i << ": mean: " << firstMoment[i] << endl;
     }
+    delete[] firstMoment;
 }
 void DataAnalytics::secondMoment() const
 {
@@ -166,6 +194,7 @@ void DataAnalytics::secondMoment() const
         secondMoment[i] /= this->getrow();
         cout << i << ": variance: " << secondMoment[i] << endl;
     }
+    delete[] secondMoment;
 }
 void DataAnalytics::thirdMoment() const
 {
@@ -176,6 +205,7 @@ void DataAnalytics::thirdMoment() const
         thirdMoment[i] /= this->getrow();
         cout << i << ": skewness: " << thirdMoment[i] << endl;
     }
+    delete[] thirdMoment;
 }
 void DataAnalytics::fourthMoment() const
 {
@@ -186,46 +216,77 @@ void DataAnalytics::fourthMoment() const
         fourthMoment[i] /= this->getrow();
         cout << i << ": kurtosis: " << fourthMoment[i] << endl;
     }
+    delete[] fourthMoment;
 }
 double *DataAnalytics::nthMoment(int n) const
 {
     //One entry for each column (the variance)
     double *nthMoment = new double[getcol()];
+    for (int i = 0; i < this->getcol(); i++)
+    {
+        nthMoment[i] = 0;
+    }
+
     //use openmp
     for (int i = 0; i < getrow(); i++)
     {
         for (int j = 0; j < getcol(); j++)
         {
+
             (nthMoment[j]) += pow((this->data[j])[i], n);
         }
     }
     return nthMoment;
 }
-void DataAnalytics::kMeansClustering(int numberOfClusters) const
+void DataAnalytics::setNumberOfClusters(int n)
 {
-    //need to select random centroids
-    double **centroids = new double *[numberOfClusters];
+    if(n > 0){
+        this->numberOfClusters=n;
+    }
+}
+
+void DataAnalytics::kMeansClustering(int numberOfClusters)
+{
+    //set number of clusters as member variable
+    this->setNumberOfClusters(numberOfClusters);
+    //intialize centroids as member variable
+    this->centroids = new double *[numberOfClusters];
     //get first n rows as initial centroids where n is number of columns (dimensions)
     for (int i = 0; i < numberOfClusters; i++)
     {
+        //Initialization
         centroids[i] = new double[this->getcol()];
+        //This loop traverses each row
         for (int j = 0; j < this->getcol(); j++)
-        {
-            (centroids[i])[j] = (this->data[j])[i];
+        {   
+            //i is cluster number, j is column
+            (centroids[i])[j] = (this->getData()[j])[i];
         }
     }
-    //centroid check
-    // for (int i = 0; i < numberOfClusters; i++)
-    // {
-    //     for (int j = 0; j < this->getcol(); j++)
-    //     {
-    //         cout << (centroids[i])[j] << " ";
-    //     }
-    //     cout << endl;
-    // }
+    //Initialize membership
+    this->membership = new int[this->getrow()];
+
+    for (int i = 0; i < this->getrow(); i++)
+    {
+        membership[i] = 0;
+    }
+    classify();
+    printCentroids();
+    classify();
+    printCentroids();
+    classify();
+    printCentroids();
+    classify();
+    printCentroids();
+    classify();
+    printCentroids();
+    classify();
+    printCentroids();
+}
+
+void DataAnalytics::classify() const
+{
     //calc dist between every point and both centroids, favoring the smaller dist
-    int *membership = new int[this->getrow()];
-    //one interation of memebrship
     for (int i = 0; i < this->getrow(); i++)
     {
         //distance formula
@@ -238,11 +299,7 @@ void DataAnalytics::kMeansClustering(int numberOfClusters) const
 
             for (int k = 0; k < this->getcol(); k++)
             {
-                // cout << "init insideqrt: "<<insideSqrt<<endl;
                 insideSqrt += pow((centroids[j])[k] - ((this->data[k])[i]), 2);
-                // cout << "centroids[j][k]: " << (centroids[j])[k] << " this->data[k][i]: "<<(this->data[k])[i]<<endl;
-                // cout << "diff" << (centroids[j])[k] - ((this->data[k])[i]) << endl;
-                // cout << "i: " << i << " j: " << j << " k: " << k << " insidesqrt: "<<insideSqrt<< endl;
             }
             //is distance
             double distance(sqrt(insideSqrt));
@@ -257,47 +314,44 @@ void DataAnalytics::kMeansClustering(int numberOfClusters) const
                 minDist = distance;
             }
         }
-        cout << "minCentroid: " << minCentroid << " mindist: " << minDist << endl;
         membership[i] = minCentroid;
     }
-    for (int i = 0; i < this->getrow(); i++)
-    {
-        cout << membership[i] << endl;
-    }
+
     //determine centroid again
     //clear last centroid
     for (int i = 0; i < numberOfClusters; i++)
     {
         for (int j = 0; j < this->getcol(); j++)
         {
-            (centroids[i])[j] = 0;
+            (this->centroids[i])[j] = 0;
         }
     }
     //add all pts
+    //Initialize numberOfPointsInCluster
     int *numberOfPointsInCluster = new int[numberOfClusters];
+    for (int i = 0; i < numberOfClusters; i++)
+    {
+        numberOfPointsInCluster[i] = 0;
+    }
+    //Sum all points and count numberOfPointsInCluster
     for (int i = 0; i < this->getrow(); i++)
     {
         for (int j = 0; j < this->getcol(); j++)
         {
-            (centroids[membership[i]])[j] += (this->data[j])[i];
-            numberOfPointsInCluster[membership[i]] += 1;
+            (this->centroids[membership[i]])[j] += (this->data[j])[i];
         }
+        numberOfPointsInCluster[membership[i]] += 1;
     }
-    cout << numberOfPointsInCluster[0] << endl
-         << numberOfPointsInCluster[1] << endl;
-    //divide by n
+
+    //Divide each cluster sum by numberOfPointsInCluster
     for (int i = 0; i < numberOfClusters; i++)
     {
         for (int j = 0; j < this->getcol(); j++)
         {
-            (centroids[i])[j] /= numberOfPointsInCluster[i];
-            cout << (centroids[i])[j] << endl;
+            (this->centroids[i])[j] /= numberOfPointsInCluster[i];
         }
     }
     delete[] numberOfPointsInCluster;
-}
-void DataAnalytics::classify() const
-{
 }
 //not incl in project
 /**
@@ -314,4 +368,24 @@ void DataAnalytics::printArray(double *arrayToPrint, int size)
         cout << arrayToPrint[i] << " ";
     }
     cout << endl;
+}
+void DataAnalytics::printMembership() const
+{
+    // Print membership
+    for (int i = 0; i < this->getrow(); i++)
+    {
+        cout << membership[i] << endl;
+    }
+}
+void DataAnalytics::printCentroids() const
+{
+    cout << "NEW CENTROIDS:" << endl;
+    for (int i = 0; i < this->numberOfClusters; i++)
+    {
+        for (int j = 0; j < this->getcol(); j++)
+        {
+            cout << (this->centroids[i])[j] << " ";
+        }
+        cout << endl;
+    }
 }
