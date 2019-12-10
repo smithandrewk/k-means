@@ -8,3 +8,6 @@ run "make run" to run
 run "make v" to run valgrind
 
 run "make c" to clean directory
+
+# TODO
+remove .vscode directory
