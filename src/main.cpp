@@ -40,51 +40,51 @@ int main(int argc, char **argv)
     cout << "Fourth statistical moment: " << endl;
     train.fourthMoment();
 
-    // train.kMeansClustering(2);
+    train.kMeansClustering(2);
 
-    // cout << "Please enter the name of the testing file, rows, and columns: ";
-    // cin >> fname;
-    // cin >> row;
-    // cin >> col;
-    // test.setrow(row);
-    // test.setcol(col);
+    cout << "Please enter the name of the testing file, rows, and columns: ";
+    cin >> fname;
+    cin >> row;
+    cin >> col;
+    test.setrow(row);
+    test.setcol(col);
 
-    // in_file.open(fname);
-    // if (in_file.fail())
-    // {
-    //     cout << "Error openning the file " << argv[1] << " \n";
-    //     exit(1);
-    // }
-    // in_file >> test;
-    // in_file.close();
-    // cout << "-----TRAIN------" << endl;
-    // cout << "col: " << train.getcol() << endl;
-    // cout << "row: " << train.getrow() << endl;
-    // cout << "number of clusters: " << train.getNumberOfClusters() << endl;
-    // cout << "-----TEST------" << endl;
-    // cout << "col: " << test.getcol() << endl;
-    // cout << "row: " << test.getrow() << endl;
-    // cout << "number of clusters: " << test.getNumberOfClusters() << endl;
+    in_file.open(fname);
+    if (in_file.fail())
+    {
+        cout << "Error openning the file " << argv[1] << " \n";
+        exit(1);
+    }
+    in_file >> test;
+    in_file.close();
+    cout << "-----TRAIN------" << endl;
+    cout << "col: " << train.getcol() << endl;
+    cout << "row: " << train.getrow() << endl;
+    cout << "number of clusters: " << train.getNumberOfClusters() << endl;
+    cout << "-----TEST------" << endl;
+    cout << "col: " << test.getcol() << endl;
+    cout << "row: " << test.getrow() << endl;
+    cout << "number of clusters: " << test.getNumberOfClusters() << endl;
 
-    // test = train;
-    // cout << "-----TEST-AFTER-EQUALITY------" << endl;
-    // cout << "col: " << test.getcol() << endl;
-    // cout << "row: " << test.getrow() << endl;
-    // cout << "number of clusters: " << test.getNumberOfClusters() << endl;
-    // test.classify();
+    test = train;
+    cout << "-----TEST-AFTER-EQUALITY------" << endl;
+    cout << "col: " << test.getcol() << endl;
+    cout << "row: " << test.getrow() << endl;
+    cout << "number of clusters: " << test.getNumberOfClusters() << endl;
+    test.classify();
 
-    // cout << "Please enter the output file: ";
-    // cin >> fname;
+    cout << "Please enter the output file: ";
+    cin >> fname;
 
-    // out_file.open(fname);
-    // if (out_file.fail())
-    // {
-    //     cout << "Error openning the file " << argv[2] << " \n";
-    //     exit(1);
-    // }
+    out_file.open(fname);
+    if (out_file.fail())
+    {
+        cout << "Error openning the file " << argv[2] << " \n";
+        exit(1);
+    }
 
-    // out_file << test << endl;
-    // out_file.close();
+    out_file << test << endl;
+    out_file.close();
 
     return 0;
 }

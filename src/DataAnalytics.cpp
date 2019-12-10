@@ -129,7 +129,7 @@ DataAnalytics::~DataAnalytics()
     }
 }
 /**
- * Overloaded assignment operator. Copies all data members except the data matrix.
+ * Overloaded assignment operator. Copies all data members except the data matrix. TRAIN AND TEST MUST HAVE SAME NUMBER OF COLUMNS AT THE MOMENT.
  * @param rhs DataAnalytics object to assign this to
  * @return constant DataAnalytics object to allow for cascading
  */
@@ -137,17 +137,17 @@ DataAnalytics::~DataAnalytics()
 const DataAnalytics &DataAnalytics::operator=(const DataAnalytics &rhs)
 {
     this->numberOfClusters = rhs.getNumberOfClusters();
-    //Deciding not to set rows, because what if you train, then set rows of test in main, then set rows here?
+    //what if you train, then set rows of test in main, then set rows here?
+    //Doesn't work at moment when uncommenting following 2 rows. train and test need to have same number of columns! Runs w/o error if you train with higher dimensions, has a small write error if you test with higher dimensions. Neither is intutive, however. The dimensions between train and test should be the same.
     // this->setrow(rhs.getrow());
-    //Deciding not to set columns for the same reason as above
-    // this->setcol(rhs.getcol())
+    // this->setcol(rhs.getcol());
     centroids = new double *[numberOfClusters];
     for (int i = 0; i < numberOfClusters; i++)
     {
         //SHOULD be same number of columns
         (centroids[i]) = new double[columns];
         for (int j = 0; j < columns; j++)
-        {
+        { 
             (centroids[i])[j] = (rhs.centroids[i])[j];
         }
     }
@@ -363,10 +363,11 @@ void DataAnalytics::zeroMoment() const
 void DataAnalytics::firstMoment()
 {
     //One entry for each column (the mean)
-    // double *firstMoment = nthMoment(1);
+
     this->mean = nthMoment(1);
     for (int i = 0; i < this->getcol(); i++)
     {
+
         this->mean[i] /= this->getrow();
         cout << i << ": mean: " << this->mean[i] << endl;
     }

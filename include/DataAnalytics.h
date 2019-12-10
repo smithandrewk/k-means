@@ -7,22 +7,20 @@
 #include <iostream>
 #include <omp.h>
 using namespace std;
-
+//TODO implement openmp. Haven't had time yet.
 class DataAnalytics
 {
-    //TODO IGNORE BLANK LINES
-    //?How to define in implementation file?
+
     /**
-     * Overloaded stream extraction operator which checks if there is enough data in the datafile, reads in the data and stores in this->data
+     * Overloaded stream extraction operator which checks if there is enough data in the datafile, reads in the data and stores in this->data. DOES NOT HANDLE HEADERS. Not very happy about this. Works well, with nice efficiency, when input files are formatted as OCTAVE outputs. There are a few edge cases that cause errors.
      * @param lhs input stream to read from
      * @param rhs DataAnalytics object to read into
      */
-
+    //?How to define in implementation file?
     friend istream &operator>>(istream &lhs, const DataAnalytics &rhs)
     {
-        //TODO check for first line of data
         //TODO handle headers
-
+        //TODO handle blank lines in middle
         int i(-1);
         int lastI;
         char str[256] = {};
@@ -32,21 +30,19 @@ class DataAnalytics
         int numRows(0);
         while ((i = lhs.get()) != EOF)
         {
-            if(numRows+1>rhs.getrow()){
-                //Too many rows
-                    cout << "Expected: " << rhs.getrow() << " rows. Counter was about to exceed that. There are a greater number of rows in your data file than you indicated." << endl;
+
+                //Not enough data in file
+                if (lhs.peek() == EOF && numRows + 1 < rhs.getrow())
+                {
+                    //Not enough rows
+                    cout << "Expected: " << rhs.getrow() << " rows. Got " << numRows << " rows\nYou allocated more rows than were present in your data file." << endl;
                     //TODO deconstructors
                     exit(1);
-            }
-            if (lhs.peek() == EOF && numRows+1<rhs.getrow())
-            {
-                //Not enough rows
-                    cout << "Expected: " << rhs.getrow() << " rows. Got "<<numRows<<" rows"<< endl;
-                    //TODO deconstructors
-                    exit(1);
-            } else if (lhs.peek()==EOF){
+                    //this following else if eats up the very last data point, but I think it also causes errors
+                }else if (lhs.peek()==EOF){
                 (rhs.data[numCols])[numRows] = atof(str);
                 numRows++;
+                return lhs;
             }
             //Octave formats data files with a space first
             if (i == ' ' && first)
@@ -54,14 +50,17 @@ class DataAnalytics
                 first = false;
                 continue;
             }
+            //if any character is read that isn't a space or an endline
             else if (!(i == ' ' || i == '\n'))
             {
+                //use char *str as buffer for characters in file
                 char c = i;
                 str[byte++] = c;
             }
+            //we just saw an endline character
             else if (lastI == '\n')
             {
-                if (i == ' ' && lhs.peek() != ' ' && lhs.peek() != '\n')
+                if ((i == ' ') && lhs.peek() != ' ' && lhs.peek() != '\n')
                 {
                     //valid new line after a series of Blanks
                     continue;
@@ -71,14 +70,15 @@ class DataAnalytics
                     //Blank Line
                 }
             }
+            //Legal endline
+
             else if (i == '\n')
             {
-                //Legal endline
                 //numCols is one behind
                 if (numCols + 1 < rhs.getcol())
                 {
                     //not enough cols
-                    cout << "Expected: " << rhs.getcol() << " columns in each row. Row " << (numRows + 1) << " had " << numCols + 1 << endl;
+                    cout << "Expected: " << rhs.getcol() << " columns in each row. Row " << (numRows + 1) << " had " << numCols << endl;
                     //TODO deconstructors
                     exit(1);
                 }
@@ -91,32 +91,56 @@ class DataAnalytics
                 }
                 else
                 {
-                    //just right
-                    //reset for next row
-                    // cout << "numcols: " << numCols << "numrows: " << numRows << endl;
-
+                    //just right number of columns
+                    //take in double in buffer
                     (rhs.data[numCols])[numRows] = atof(str);
-                    byte=0;
+                    //reset byte counter
+                    byte = 0;
+                    //reset column counter
                     numCols = 0;
+                    //new row (numRows == 1 when we have read 1 row entirely..)
                     numRows++;
                 }
+                //Last line
+                if (numRows == rhs.getrow())
+                {
+                    //if next char is not end of file
+                    if (!(lhs.peek() == ' ' || lhs.peek() == '\n'))
+                    {
+                        //more than getrow lines
+                        cout << "Expected: " << rhs.getrow() << " rows. Got " << numRows << " rows" << endl;
+                        //TODO deconstructors
+                        exit(1);
+                    }
+                    else
+                    {
+                        return lhs;
+                    }
+                }
+                //If there is a space at the beginning of the next line, clean it up
                 if (lhs.peek() == ' ')
                 {
                     //octave cleanup
                     lhs.get();
                 }
+                else if (lhs.peek() == '\n')
+                {
+                    //Blank
+                }
             }
+            //Delimiter for new column
             else if (i == ' ')
             {
-                // cout << "numcols: " << numCols << "numrows: " << numRows << endl;
+                //Convert char arr str to double
                 (rhs.data[numCols])[numRows] = atof(str);
-                // cout << str;
+                //Reset byte counter for buffer
                 byte = 0;
                 //new column
                 numCols++;
             }
             lastI = i;
         }
+
         return lhs;
     }
     /**
