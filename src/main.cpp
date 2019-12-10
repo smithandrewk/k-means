@@ -8,17 +8,17 @@ using namespace std;
 int main(int argc, char **argv)
 {
     int row, col;
-    string fname("final200.txt");
+    string fname;
     ifstream in_file;
     ofstream out_file;
     DataAnalytics train, test;
 
-    // cout << "Please enter the name of the train file, rows, and columns: ";
-    // cin >> fname;
-    // cin >> row;
-    // cin >> col;
-    train.setrow(200);
-    train.setcol(2);
+    cout << "Please enter the name of the train file, rows, and columns: ";
+    cin >> fname;
+    cin >> row;
+    cin >> col;
+    train.setrow(row);
+    train.setcol(col);
 
     in_file.open(fname);
     if (in_file.fail())
@@ -42,14 +42,14 @@ int main(int argc, char **argv)
 
     train.kMeansClustering(2);
 
-    // cout << "Please enter the name of the testing file, rows, and columns: ";
-    // cin >> fname;
-    // cin >> row;
-    // cin >> col;
-    test.setrow(2000000);
-    test.setcol(2);
+    cout << "Please enter the name of the testing file, rows, and columns: ";
+    cin >> fname;
+    cin >> row;
+    cin >> col;
+    test.setrow(row);
+    test.setcol(col);
 
-    in_file.open("final2000000.txt");
+    in_file.open(fname);
     if (in_file.fail())
     {
         cout << "Error openning the file " << argv[1] << " \n";
@@ -57,14 +57,26 @@ int main(int argc, char **argv)
     }
     in_file >> test;
     in_file.close();
-    DataAnalytics copy(train);
+    cout << "-----TRAIN------" << endl;
+    cout << "col: " << train.getcol() << endl;
+    cout << "row: " << train.getrow() << endl;
+    cout << "number of clusters: " << train.getNumberOfClusters() << endl;
+    cout << "-----TEST------" << endl;
+    cout << "col: " << test.getcol() << endl;
+    cout << "row: " << test.getrow() << endl;
+    cout << "number of clusters: " << test.getNumberOfClusters() << endl;
+
     test = train;
+    cout << "-----TEST-AFTER-EQUALITY------" << endl;
+    cout << "col: " << test.getcol() << endl;
+    cout << "row: " << test.getrow() << endl;
+    cout << "number of clusters: " << test.getNumberOfClusters() << endl;
     test.classify();
 
-    // cout << "Please enter the output file: ";
-    // cin >> fname;
+    cout << "Please enter the output file: ";
+    cin >> fname;
 
-    out_file.open("out");
+    out_file.open("mom");
     if (out_file.fail())
     {
         cout << "Error openning the file " << argv[2] << " \n";

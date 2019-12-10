@@ -6,20 +6,23 @@ using namespace std;
 //Default Constructor
 DataAnalytics::DataAnalytics()
 {
+    //Pointers initialize to NULL
     data = NULL;
     centroids = NULL;
     membership = NULL;
+    //Size intiializes to 0
     this->setrow(0);
     this->setcol(0);
+    //Number of clusters defaults to 0
+    this->setNumberOfClusters(0);
 }
 //Alternate Constructor
-DataAnalytics::DataAnalytics(int rows, int columns, double value=0)
+DataAnalytics::DataAnalytics(int rows, int columns, double value = 0)
 {
     data = new double *[columns];
-        this->setrow(rows);
+    this->setrow(rows);
     this->setcol(columns);
     //TODO init with value
-
 }
 DataAnalytics::DataAnalytics(double **)
 {
@@ -74,6 +77,7 @@ DataAnalytics::~DataAnalytics()
             }
         }
         delete[] this->data;
+        delete[] this->membership;
     }
     if (this->centroids == NULL)
     {
@@ -94,15 +98,16 @@ DataAnalytics::~DataAnalytics()
         }
         delete[] this->centroids;
     }
-    delete[] this->membership;
 }
 //Ass
 const DataAnalytics &DataAnalytics::operator=(const DataAnalytics &rhs)
 {
-    this->numberOfClusters = rhs.numberOfClusters;
-    //? if we alreaddy initialized this, then why?
+    this->numberOfClusters = rhs.getNumberOfClusters();
+    //Deciding not to set rows, because what if you train, then set rows of test in main, then set rows here?
+    // this->setrow(rhs.getrow());
+    //Deciding not to set columns for the same reason as above
+    // this->setcol(rhs.getcol())
     centroids = new double *[numberOfClusters];
-
     for (int i = 0; i < numberOfClusters; i++)
     {
         //SHOULD be same number of columns
@@ -114,6 +119,10 @@ const DataAnalytics &DataAnalytics::operator=(const DataAnalytics &rhs)
     }
 
     return *this;
+}
+int DataAnalytics::getNumberOfClusters() const
+{
+    return this->numberOfClusters;
 }
 //Equality operator
 //?
@@ -139,6 +148,7 @@ void DataAnalytics::setcol(int columns)
     if (columns == 0)
     {
         this->data = NULL;
+        this->membership = NULL;
     }
     else
     {
@@ -309,9 +319,14 @@ double *DataAnalytics::nthMoment(int n) const
  */
 void DataAnalytics::setNumberOfClusters(int n)
 {
-    if (n > 0)
+    if (n >= 0)
     {
         this->numberOfClusters = n;
+    }
+    else
+    {
+        cout << "Invalid number of clusters: " << n << " (should be >=0)" << endl;
+        exit(0);
     }
 }
 /**
@@ -337,15 +352,55 @@ void DataAnalytics::kMeansClustering(int numberOfClusters)
             (centroids[i])[j] = (this->getData()[j])[i];
         }
     }
+    cout << "INITIAL CENTROIDS" << endl;
+    printCentroids();
+    double **lastCentroids = new double *[this->numberOfClusters];
+    for (int i = 0; i < this->numberOfClusters; i++)
+    {
+        lastCentroids[i] = new double[this->getcol()];
+        for (int j = 0; j < this->getcol(); j++)
+        {
+            (lastCentroids[i])[j] = 0;
+        }
+    }
 
-    //TODO convergence condition
-    classify();
-    classify();
-    classify();
+    do
+    {
+        for (int i = 0; i < this->numberOfClusters; i++)
+        {
+            for (int j = 0; j < this->getcol(); j++)
+            {
+                (lastCentroids[i])[j] = (this->centroids[i])[j];
+            }
+        }
+        classify();
+
+    } while (isDifferentCentroids(lastCentroids));
+    for (int i = 0; i < this->numberOfClusters; i++)
+    {
+        delete[] lastCentroids[i];
+    }
+    delete[] lastCentroids;
 }
 
+bool DataAnalytics::isDifferentCentroids(double **last)
+{
+    bool ret = false;
+    for (int i = 0; i < this->numberOfClusters; i++)
+    {
+        for (int j = 0; j < this->getcol(); j++)
+        {
+            if ((last[i])[j] != (this->centroids[i])[j])
+            {
+                ret = true;
+            }
+        }
+    }
+    return ret;
+}
 void DataAnalytics::classify() const
 {
+    cout << "DataAnalytics::classify" << endl;
     //calc dist between every point and both centroids, favoring the smaller dist
     for (int i = 0; i < this->getrow(); i++)
     {
@@ -412,6 +467,7 @@ void DataAnalytics::classify() const
         }
     }
     delete[] numberOfPointsInCluster;
+    cout << "NEW CENTROIDS" << endl;
     printCentroids();
 }
 //not incl in project
@@ -444,7 +500,6 @@ void DataAnalytics::printMembership() const
 }
 void DataAnalytics::printCentroids() const
 {
-    cout << "NEW CENTROIDS:" << endl;
     for (int i = 0; i < this->numberOfClusters; i++)
     {
         for (int j = 0; j < this->getcol(); j++)

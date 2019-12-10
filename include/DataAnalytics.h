@@ -12,26 +12,54 @@ class DataAnalytics
         //TODO handle headers
         double temp(0);
         int i(0);
+        int numberOfLines(0);
 
-// #pragma omp parallel
-//         {
-//             for (int i = 0; i < rhs.getrow(); i++)
-//             {
-//                 for (int j = 0; j < rhs.getcol(); j++)
-//                 {
-//                     lhs >> (rhs.data[j])[i];
-//                 }
-//             }
-//         }
+        //TODO doesn't handle blank lines..
+        char *a = new char[256];
+        while (lhs.getline(a, 256))
+        {
+            numberOfLines++;
+        }
+        lhs.clear();
+        lhs.seekg(0);
 
-        while (!lhs.eof())
+        if (numberOfLines > rhs.getrow())
+        {
+            cout << "There might be some extra lines in your data file...\nExpected: " << rhs.getrow() << " lines\nRead: " << numberOfLines << " lines" << endl;
+            exit(1);
+        }
+        else if (numberOfLines < rhs.getrow())
+        {
+            cout << "There might be some missing lines in your data file...\nExpected: " << rhs.getrow() << " lines\nRead: " << numberOfLines << " lines" << endl;
+            exit(1);
+        }
+        int numInThisRow(0);
+        for (int i = 0; i < rhs.getrow(); i++)
         {
             for (int j = 0; j < rhs.getcol(); j++)
             {
+                if (lhs.peek() == '\n')
+                {
+                    if (numInThisRow > rhs.getcol())
+                    {
+                        cout << "Expected: " << rhs.getcol() << " columns in each row. Row " << (i+1) << " had more than that." << endl;
+                        //TODO deconstructors
+                        exit(1);
+                    }
+                    else if (numInThisRow < rhs.getcol())
+                    {
+                        cout << "Expected: " << rhs.getcol() << " columns in each row. Row " << (i+1) << " had less than that." << endl;
+                        //TODO deconstructors
+                        exit(1);
+                    }
+                    numInThisRow = 0;
+                }
+
                 lhs >> (rhs.data[j])[i];
+                numInThisRow++;
             }
-            i += 1;
         }
+        delete[] a;
         return lhs;
     }
     //?How to define in implementation file?
@@ -41,15 +69,6 @@ class DataAnalytics
         {
             for (int j = 0; j < rhs.getcol(); j++)
             {
-                //Pretty printing to check if last column
-                // if (j == (rhs.getcol() - 1))
-                // {
-                //     lhs << (rhs.data[j])[i] << endl;
-                // }
-                // else
-                // {
-                //     lhs << (rhs.data[j])[i] << ", ";
-                // }
                 //Updated valafar instructions
                 lhs << (rhs.data[j])[i] << " ";
             }
@@ -65,24 +84,18 @@ private:
     int numberOfClusters;
 
 public:
-    //TODO proper member init
-
     DataAnalytics();
     DataAnalytics(int rows, int columns, double value);
     DataAnalytics(double **);
     DataAnalytics(const DataAnalytics &);
     ~DataAnalytics();
-    //Ass
     const DataAnalytics &operator=(const DataAnalytics &);
-    //Equality operator
-    //?
     bool operator==(const DataAnalytics &) const;
-    //Inequality operator
-    //?unsure of rhs
     bool operator!=(const DataAnalytics &) const;
     void setcol(int columns);
     int getcol() const;
     void setNumberOfClusters(int);
+    int getNumberOfClusters() const;
     void setrow(int rows);
     int getrow() const;
     double **getData() const;
@@ -100,4 +113,5 @@ public:
     void printArray(double *arrayToPrint, int size);
     void printCentroids() const;
     void printMembership() const;
+    bool isDifferentCentroids(double **last);
 };
