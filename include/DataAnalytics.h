@@ -1,11 +1,22 @@
+/*
+ * file: myArray.cpp
+ * author: Andrew Smith
+ * date: 12/09/19, 9:30PM
+ * description: this file is the header file for the DataAnalytics class. The DataAnalytics object implements a naive k-means algorithm. See README.md for more information.
+ */
 #include <iostream>
 #include <omp.h>
 using namespace std;
 
 class DataAnalytics
 {
-    //TODO const qualification
     //?How to define in implementation file?
+    /**
+     * Overloaded stream extraction operator which checks if there is enough data in the datafile, reads in the data and stores in this->data
+     * @param lhs input stream to read from
+     * @param rhs DataAnalytics object to read into
+     */
+
     friend istream &operator>>(istream &lhs, const DataAnalytics &rhs)
     {
         //TODO check for first line of data
@@ -42,13 +53,13 @@ class DataAnalytics
                 {
                     if (numInThisRow > rhs.getcol())
                     {
-                        cout << "Expected: " << rhs.getcol() << " columns in each row. Row " << (i+1) << " had more than that." << endl;
+                        cout << "Expected: " << rhs.getcol() << " columns in each row. Row " << (i + 1) << " had more than that." << endl;
                         //TODO deconstructors
                         exit(1);
                     }
                     else if (numInThisRow < rhs.getcol())
                     {
-                        cout << "Expected: " << rhs.getcol() << " columns in each row. Row " << (i+1) << " had less than that." << endl;
+                        cout << "Expected: " << rhs.getcol() << " columns in each row. Row " << (i + 1) << " had less than that." << endl;
                         //TODO deconstructors
                         exit(1);
                     }
@@ -62,6 +73,11 @@ class DataAnalytics
         delete[] a;
         return lhs;
     }
+    /**
+     * Overloaded stream insertion operator which checks if there is enough data in the datafile, reads in the data and stores in this->data
+     * @param lhs output stream to print to
+     * @param rhs DataAnalytics object to read from
+     */
     //?How to define in implementation file?
     friend ostream &operator<<(ostream &lhs, const DataAnalytics &rhs)
     {
@@ -87,7 +103,7 @@ private:
 public:
     DataAnalytics();
     DataAnalytics(int rows, int columns, double value);
-    DataAnalytics(int rows, int columns,double **);
+    DataAnalytics(int rows, int columns, double **);
     DataAnalytics(const DataAnalytics &);
     ~DataAnalytics();
     const DataAnalytics &operator=(const DataAnalytics &);
@@ -103,14 +119,12 @@ public:
 
     void zeroMoment() const;
     void firstMoment();
-    //TODO reconcile with website given by valafar
     void secondMoment() const;
     void thirdMoment() const;
     void fourthMoment() const;
     double *nthMoment(int n) const;
     void kMeansClustering(int numberOfClusters);
     void classify() const;
-    //not incl in project
     void printArray(double *arrayToPrint, int size);
     void printCentroids() const;
     void printMembership() const;

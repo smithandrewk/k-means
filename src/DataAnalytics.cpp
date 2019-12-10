@@ -1,3 +1,9 @@
+/*
+ * file: myArray.cpp
+ * author: Andrew Smith
+ * date: 12/09/19, 9:30PM
+ * description: this file is the implmentation file for the DataAnalytics class with the function definitions. The DataAnalytics object implements a naive k-means algorithm. See README.md for more information.
+ */
 #include "../include/DataAnalytics.h"
 #include <iostream>
 #include <math.h>
@@ -32,7 +38,7 @@ DataAnalytics::DataAnalytics(int rows, int columns, double value = 0)
         }
     }
 }
-//unsure how it would initialize data if it didnt know the size of the data
+//Alternate Constructor
 DataAnalytics::DataAnalytics(int rows, int columns, double **rhs)
 {
     this->setrow(rows);
@@ -47,6 +53,7 @@ DataAnalytics::DataAnalytics(int rows, int columns, double **rhs)
         }
     }
 }
+//Copy Constructor
 DataAnalytics::DataAnalytics(const DataAnalytics &rhs)
 {
     rows = rhs.getrow();
@@ -77,6 +84,7 @@ DataAnalytics::DataAnalytics(const DataAnalytics &rhs)
         }
     }
 }
+//Destructor
 DataAnalytics::~DataAnalytics()
 {
     if (this->data == NULL)
@@ -120,7 +128,12 @@ DataAnalytics::~DataAnalytics()
         delete[] this->centroids;
     }
 }
-//Ass
+/**
+ * Overloaded assignment operator. Copies all data members except the data matrix.
+ * @param rhs DataAnalytics object to assign this to
+ * @return constant DataAnalytics object to allow for cascading
+ */
+
 const DataAnalytics &DataAnalytics::operator=(const DataAnalytics &rhs)
 {
     this->numberOfClusters = rhs.getNumberOfClusters();
@@ -141,12 +154,12 @@ const DataAnalytics &DataAnalytics::operator=(const DataAnalytics &rhs)
 
     return *this;
 }
-int DataAnalytics::getNumberOfClusters() const
-{
-    return this->numberOfClusters;
-}
-//Equality operator
-//?
+
+/**
+ * Overloaded equality operator based on size and content
+ * @param rhs DataAnalytics object to compare this to
+ * @return boolean. true if this and rhs ARE equal
+ */
 bool DataAnalytics::operator==(const DataAnalytics &rhs) const
 {
     if ((this->getcol() != rhs.getcol()) || this->getrow() != rhs.getrow())
@@ -167,8 +180,12 @@ bool DataAnalytics::operator==(const DataAnalytics &rhs) const
     }
     return true;
 }
-//Inequality operator
-//?unsure of rhs
+/**
+ * Overloaded inequality operator based on size and content
+ * @param rhs DataAnalytics object to compare this to
+ * @return boolean. true if this and rhs are NOT equal
+ */
+
 bool DataAnalytics::operator!=(const DataAnalytics &rhs) const
 {
     if (*this == rhs)
@@ -180,6 +197,11 @@ bool DataAnalytics::operator!=(const DataAnalytics &rhs) const
         return true;
     }
 }
+/**
+ * To set member variable columns for this. Calls destructor if data is not null, initializes data and membership arrays.
+ * @param columns number of columns in data to set
+ * @return void
+ */
 void DataAnalytics::setcol(int columns)
 {
     //Doesn't check to see if data has already been initialized..
@@ -211,6 +233,10 @@ void DataAnalytics::setcol(int columns)
     }
     this->columns = columns;
 }
+/**
+ * To get member variable columns for this
+ * @return number of columns in data
+ */
 int DataAnalytics::getcol() const
 {
     return this->columns;
@@ -245,15 +271,50 @@ double **DataAnalytics::getData() const
 {
     return this->data;
 }
+/**
+ * To get the member variable numberOfClusters
+ * @return number of clusters
+ *
+ */
+
+int DataAnalytics::getNumberOfClusters() const
+{
+    return this->numberOfClusters;
+}
+/**
+ * To set the member variable numberOfClusters
+ * @param n numberOfClusters input by user in main.cpp for kmeans classification
+ * @return void
+ */
+void DataAnalytics::setNumberOfClusters(int n)
+{
+    if (n >= 0)
+    {
+        this->numberOfClusters = n;
+    }
+    else
+    {
+        cout << "Invalid number of clusters: " << n << " (should be >=0)" << endl;
+        exit(0);
+    }
+}
+/**
+ * Calcuates the proprietary "zero moment".
+ * in zeroMoment array,
+ * Index 0 - number of points in each column of data
+ * Index 1 - minimum value of column
+ * Index 2 - maximum value of column
+ * @return void
+ *
+ */
+
 void DataAnalytics::zeroMoment() const
 {
     double **zeroMoment = new double *[this->getcol()];
     //Init each zeroMoment to be printed
     for (int i = 0; i < this->getcol(); i++)
     {
-        //Index 0 - number of points in each column of data
-        //Index 1 - minimum value of column
-        //Index 2 - maximum value of column
+
         zeroMoment[i] = new double[3];
         for (int j = 0; j < 3; j++)
         {
@@ -293,6 +354,12 @@ void DataAnalytics::zeroMoment() const
     }
     delete[] zeroMoment;
 }
+/**
+ * Calulcates the first moment, which is the mean, on each column of data
+ * @return void because the function prints
+ *
+ */
+
 void DataAnalytics::firstMoment()
 {
     //One entry for each column (the mean)
@@ -304,22 +371,19 @@ void DataAnalytics::firstMoment()
         cout << i << ": mean: " << this->mean[i] << endl;
     }
 }
+/**
+ * Calulcates the second moment, which is the variance around the mean, on each column of data
+ * @return void because the function prints
+ *
+ */
 void DataAnalytics::secondMoment() const
 {
-    // //One entry for each column (the variance)
-    // double *secondMoment = nthMoment(2);
-    // for (int i = 0; i < this->getcol(); i++)
-    // {
-    //     secondMoment[i] /= this->getrow();
-    //     cout << i << ": variance: " << secondMoment[i] << endl;
-    // }
-    // delete[] secondMoment;
     double *secondMoment = new double[this->getcol()];
     for (int i = 0; i < this->getcol(); i++)
     {
         secondMoment[i] = 0;
     }
-    
+
     for (int i = 0; i < this->getcol(); i++)
     {
         for (int j = 0; j < this->getrow(); j++)
@@ -330,6 +394,11 @@ void DataAnalytics::secondMoment() const
     }
     delete[] secondMoment;
 }
+/**
+ * Calulcates the third moment, which is skewness, on each column of data
+ * @return void because the function prints
+ *
+ */
 void DataAnalytics::thirdMoment() const
 {
     //One entry for each column (the skewness)
@@ -341,6 +410,11 @@ void DataAnalytics::thirdMoment() const
     }
     delete[] thirdMoment;
 }
+/**
+ * Calulcates the fourth moment, which is kurtosis, on each column of data
+ * @return void because the function prints
+ *
+ */
 void DataAnalytics::fourthMoment() const
 {
     //One entry for each column (the kurtosis)
@@ -352,6 +426,12 @@ void DataAnalytics::fourthMoment() const
     }
     delete[] fourthMoment;
 }
+/**
+ * Helper function to calulcate the nth moment on each column of data with a geometric series.
+ * @param n the number of the moment to calculate
+ * @return array which is the nth moment on each column (not divided by n yet in the geometric series)
+ *
+ */
 double *DataAnalytics::nthMoment(int n) const
 {
     //One entry for each column (the variance)
@@ -372,23 +452,7 @@ double *DataAnalytics::nthMoment(int n) const
     }
     return nthMoment;
 }
-/**
- * To set the member variable numberOfClusters
- * @param n numberOfClusters input by user in main.cpp for kmeans classification
- * @return void
- */
-void DataAnalytics::setNumberOfClusters(int n)
-{
-    if (n >= 0)
-    {
-        this->numberOfClusters = n;
-    }
-    else
-    {
-        cout << "Invalid number of clusters: " << n << " (should be >=0)" << endl;
-        exit(0);
-    }
-}
+
 /**
  * naive implementation of k-means
  * @param numberOfClusters number of clustersto classify the data points into
@@ -414,6 +478,7 @@ void DataAnalytics::kMeansClustering(int numberOfClusters)
     }
     cout << "INITIAL CENTROIDS" << endl;
     printCentroids();
+    //initialize 2d array for centroid values from last classification to determine convergence
     double **lastCentroids = new double *[this->numberOfClusters];
     for (int i = 0; i < this->numberOfClusters; i++)
     {
@@ -424,6 +489,7 @@ void DataAnalytics::kMeansClustering(int numberOfClusters)
         }
     }
 
+    //convergence occurs when centroids don't chance over one iteration
     do
     {
         for (int i = 0; i < this->numberOfClusters; i++)
@@ -436,12 +502,18 @@ void DataAnalytics::kMeansClustering(int numberOfClusters)
         classify();
 
     } while (isDifferentCentroids(lastCentroids));
+    //deallocation
     for (int i = 0; i < this->numberOfClusters; i++)
     {
         delete[] lastCentroids[i];
     }
     delete[] lastCentroids;
 }
+/**
+ * Helper function to determine if the centroids have changed.
+ * @param last 2d array of previous centroids to determine if they are equal to this' centroids
+ * @return boolean. true if the centroids ARE DIFFERENT
+ */
 
 bool DataAnalytics::isDifferentCentroids(double **last)
 {
@@ -458,9 +530,14 @@ bool DataAnalytics::isDifferentCentroids(double **last)
     }
     return ret;
 }
+/**
+ * Actual meat and potatoes of k-means algorithm. Classifies a set of points based upon given centroids and the distance between each point and each centroid
+ * @return void
+ */
+
+
 void DataAnalytics::classify() const
 {
-    cout << "DataAnalytics::classify" << endl;
     //calc dist between every point and both centroids, favoring the smaller dist
     for (int i = 0; i < this->getrow(); i++)
     {
@@ -491,7 +568,6 @@ void DataAnalytics::classify() const
         }
         membership[i] = minCentroid;
     }
-
     //determine centroid again
     //clear last centroid
     for (int i = 0; i < numberOfClusters; i++)
@@ -547,7 +623,7 @@ void DataAnalytics::printArray(double *arrayToPrint, int size)
     cout << endl;
 }
 /**
- * To print the membership array of this
+ * To print this' membership array for testing
  * @return void
  */
 void DataAnalytics::printMembership() const
@@ -558,6 +634,13 @@ void DataAnalytics::printMembership() const
         cout << membership[i] << endl;
     }
 }
+/**
+ * To print this' centroids for testing
+ * @return void because this is a printing function
+ *
+ */
+
+
 void DataAnalytics::printCentroids() const
 {
     for (int i = 0; i < this->numberOfClusters; i++)

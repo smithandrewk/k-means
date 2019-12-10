@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     cout << "Please enter the output file: ";
     cin >> fname;
 
-    out_file.open("mom");
+    out_file.open(fname);
     if (out_file.fail())
     {
         cout << "Error openning the file " << argv[2] << " \n";
