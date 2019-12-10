@@ -81,12 +81,13 @@ private:
     int rows, columns;
     double **data, **centroids;
     int *membership;
+    double *mean;
     int numberOfClusters;
 
 public:
     DataAnalytics();
     DataAnalytics(int rows, int columns, double value);
-    DataAnalytics(double **);
+    DataAnalytics(int rows, int columns,double **);
     DataAnalytics(const DataAnalytics &);
     ~DataAnalytics();
     const DataAnalytics &operator=(const DataAnalytics &);
@@ -101,7 +102,7 @@ public:
     double **getData() const;
 
     void zeroMoment() const;
-    void firstMoment() const;
+    void firstMoment();
     //TODO reconcile with website given by valafar
     void secondMoment() const;
     void thirdMoment() const;

@@ -10,6 +10,7 @@ DataAnalytics::DataAnalytics()
     data = NULL;
     centroids = NULL;
     membership = NULL;
+    mean = NULL;
     //Size intiializes to 0
     this->setrow(0);
     this->setcol(0);
@@ -19,13 +20,32 @@ DataAnalytics::DataAnalytics()
 //Alternate Constructor
 DataAnalytics::DataAnalytics(int rows, int columns, double value = 0)
 {
-    data = new double *[columns];
     this->setrow(rows);
     this->setcol(columns);
-    //TODO init with value
+    data = new double *[columns];
+    for (int i = 0; i < columns; i++)
+    {
+        (data[i]) = new double[rows];
+        for (int j = 0; j < rows; j++)
+        {
+            (data[i])[j] = value;
+        }
+    }
 }
-DataAnalytics::DataAnalytics(double **)
+//unsure how it would initialize data if it didnt know the size of the data
+DataAnalytics::DataAnalytics(int rows, int columns, double **rhs)
 {
+    this->setrow(rows);
+    this->setcol(columns);
+    data = new double *[columns];
+    for (int i = 0; i < columns; i++)
+    {
+        (data[i]) = new double[rows];
+        for (int j = 0; j < rows; j++)
+        {
+            (data[i])[j] = (rhs[i])[j];
+        }
+    }
 }
 DataAnalytics::DataAnalytics(const DataAnalytics &rhs)
 {
@@ -78,6 +98,7 @@ DataAnalytics::~DataAnalytics()
         }
         delete[] this->data;
         delete[] this->membership;
+        delete[] this->mean;
     }
     if (this->centroids == NULL)
     {
@@ -128,13 +149,37 @@ int DataAnalytics::getNumberOfClusters() const
 //?
 bool DataAnalytics::operator==(const DataAnalytics &rhs) const
 {
+    if ((this->getcol() != rhs.getcol()) || this->getrow() != rhs.getrow())
+    {
+        return false;
+    }
+
+    for (int i = 0; i < columns; i++)
+    {
+
+        for (int j = 0; j < rows; j++)
+        {
+            if ((data[i])[j] != (rhs.getData()[i])[j])
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 //Inequality operator
 //?unsure of rhs
 bool DataAnalytics::operator!=(const DataAnalytics &rhs) const
 {
+    if (*this == rhs)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
-//TODO check for valid values
 void DataAnalytics::setcol(int columns)
 {
     //Doesn't check to see if data has already been initialized..
@@ -248,24 +293,39 @@ void DataAnalytics::zeroMoment() const
     }
     delete[] zeroMoment;
 }
-void DataAnalytics::firstMoment() const
+void DataAnalytics::firstMoment()
 {
     //One entry for each column (the mean)
-    double *firstMoment = nthMoment(1);
+    // double *firstMoment = nthMoment(1);
+    this->mean = nthMoment(1);
     for (int i = 0; i < this->getcol(); i++)
     {
-        firstMoment[i] /= this->getrow();
-        cout << i << ": mean: " << firstMoment[i] << endl;
+        this->mean[i] /= this->getrow();
+        cout << i << ": mean: " << this->mean[i] << endl;
     }
-    delete[] firstMoment;
 }
 void DataAnalytics::secondMoment() const
 {
-    //One entry for each column (the variance)
-    double *secondMoment = nthMoment(2);
+    // //One entry for each column (the variance)
+    // double *secondMoment = nthMoment(2);
+    // for (int i = 0; i < this->getcol(); i++)
+    // {
+    //     secondMoment[i] /= this->getrow();
+    //     cout << i << ": variance: " << secondMoment[i] << endl;
+    // }
+    // delete[] secondMoment;
+    double *secondMoment = new double[this->getcol()];
     for (int i = 0; i < this->getcol(); i++)
     {
-        secondMoment[i] /= this->getrow();
+        secondMoment[i] = 0;
+    }
+    
+    for (int i = 0; i < this->getcol(); i++)
+    {
+        for (int j = 0; j < this->getrow(); j++)
+        {
+            (secondMoment[i]) += pow((this->data[i])[j] - this->mean[i], 2);
+        }
         cout << i << ": variance: " << secondMoment[i] << endl;
     }
     delete[] secondMoment;
