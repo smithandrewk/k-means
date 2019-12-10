@@ -49,6 +49,8 @@ class DataAnalytics
             {
                 first = false;
                 continue;
+            } else if (first){
+                first = false;
             }
             //if any character is read that isn't a space or an endline
             else if (!(i == ' ' || i == '\n'))
