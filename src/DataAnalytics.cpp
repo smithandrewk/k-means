@@ -1,5 +1,5 @@
 /*
- * file: myArray.cpp
+ * file: DataAnalytics.cpp
  * author: Andrew Smith
  * date: 12/09/19, 9:30PM
  * description: this file is the implmentation file for the DataAnalytics class with the function definitions. The DataAnalytics object implements a naive k-means algorithm. See README.md for more information.
